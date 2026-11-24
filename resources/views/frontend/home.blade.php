@@ -130,7 +130,8 @@
         </div>
     </section>
 
-    <!-- 2. TRUSTED BY GLOBAL BRANDS -->
+    <!-- 2. TRUSTED BY GLOBAL BRANDS (Temporarily hidden) -->
+    {{--
     <section class="py-12 border-y border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p class="text-center text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-8">
@@ -154,6 +155,7 @@
             </div>
         </div>
     </section>
+    --}}
 
     <!-- 3. OUR SERVICES SECTION -->
     <section class="py-16 sm:py-20 lg:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -321,7 +323,8 @@
         </div>
     </section>
 
-    <!-- 6. CLIENT TESTIMONIALS -->
+    <!-- 6. CLIENT TESTIMONIALS (Temporarily hidden) -->
+    {{--
     <section class="py-16 sm:py-20 bg-slate-50/50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-xl mx-auto mb-12 sm:mb-14">
@@ -367,6 +370,7 @@
             </div>
         </div>
     </section>
+    --}}
 
     <!-- 7. CALL TO ACTION BANNER -->
     <x-cta-banner />
