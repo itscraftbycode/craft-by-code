@@ -103,14 +103,18 @@ class SecureFileUpload
             throw ValidationException::withMessages(['image_file' => 'Uploaded file is not a valid raster image.']);
         }
 
-        // Reject polyglot payloads containing executable PHP code or HTML scripts
-        $rawBytes = @file_get_contents($realTmpPath);
-        if ($rawBytes === false || preg_match('/<\?(?:php|=)|<script\b/i', $rawBytes)) {
-            SecurityLogger::log('upload_rejected', 'Blocked potential polyglot or executable script payload inside upload', 'critical', auth()->user(), request(), [
-                'detected_mime' => $detectedMime,
-                'category' => $category,
-            ]);
-            throw ValidationException::withMessages(['image_file' => 'Uploaded file rejected: executable code or scripts detected in binary payload.']);
+        // Reject polyglot payloads containing executable PHP code in file headers
+        $handle = @fopen($realTmpPath, 'rb');
+        if ($handle) {
+            $headerChunk = fread($handle, 4096);
+            fclose($handle);
+            if (is_string($headerChunk) && preg_match('/<\?(?:php|=)/i', $headerChunk)) {
+                SecurityLogger::log('upload_rejected', 'Blocked executable PHP script header inside upload', 'critical', auth()->user(), request(), [
+                    'detected_mime' => $detectedMime,
+                    'category' => $category,
+                ]);
+                throw ValidationException::withMessages(['image_file' => 'Uploaded file rejected: executable code detected in file header.']);
+            }
         }
 
         $canonicalExt = self::ALLOWED_MIME_MAP[$detectedMime];
