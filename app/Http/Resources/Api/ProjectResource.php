@@ -32,3 +32,4 @@ class ProjectResource extends JsonResource
         ];
     }
 }
+

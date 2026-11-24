@@ -241,3 +241,4 @@ class ApiAuthController extends Controller
         ]);
     }
 }
+

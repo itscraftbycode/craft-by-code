@@ -12,6 +12,11 @@ class AgreementSeeder extends Seeder
 {
     public function run(): void
     {
+        // Don't auto-seed sample agreements into database in production/local unless explicitly requested or running tests
+        if (! app()->environment('testing') && ! env('SEED_DUMMY_AGREEMENTS', false)) {
+            return;
+        }
+
         $admin = User::where('role', 'admin')->first() ?? User::first();
         if (! $admin) {
             return;

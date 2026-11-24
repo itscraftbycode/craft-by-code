@@ -67,15 +67,16 @@ class AgreementPolicy
             return false;
         }
 
+        if ($user->role === 'admin' || $user->role === 'super_admin') {
+            return true;
+        }
+
         // Only drafts or cancelled can be deleted
         if (! in_array($agreement->status, ['draft', 'cancelled'], true)) {
             return false;
         }
 
-        if ($user->role === 'admin' || $user->role === 'super_admin') {
-            return true;
-        }
-
         return (int) $agreement->created_by === (int) $user->id;
     }
 }
+

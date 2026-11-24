@@ -28,3 +28,4 @@ class ContactInquiryPolicy
         return $user->role === 'admin' || $user->role === 'super_admin';
     }
 }
+

@@ -156,6 +156,7 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
         Route::get('/agreements/{agreement}/edit', [AgreementController::class, 'edit'])->whereNumber('agreement')->name('agreements.edit');
         Route::put('/agreements/{agreement}', [AgreementController::class, 'update'])->whereNumber('agreement')->name('agreements.update');
         Route::delete('/agreements/{agreement}', [AgreementController::class, 'destroy'])->whereNumber('agreement')->name('agreements.destroy');
+        Route::post('/agreements/clear-dummy', [AgreementController::class, 'clearDummyAgreements'])->name('agreements.clear-dummy');
 
         Route::post('/agreements/{agreement}/pdf', [AgreementController::class, 'generatePdf'])->name('agreements.pdf');
         Route::post('/agreements/{agreement}/sign', [AgreementController::class, 'applyDigitalSignature'])->name('agreements.sign');

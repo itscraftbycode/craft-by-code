@@ -134,7 +134,11 @@ class AgreementController extends Controller
      */
     public function show(Agreement $agreement)
     {
-        $agreement->load(['template', 'creator', 'updater', 'auditLogs.user']);
+        try {
+            $agreement->loadMissing(['template', 'creator', 'updater', 'auditLogs.user']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Agreement relations failed to eager load: ' . $e->getMessage());
+        }
 
         return view('admin.agreements.show', compact('agreement'));
     }
@@ -471,30 +475,62 @@ class AgreementController extends Controller
     }
 
     /**
-     * Delete Agreement (Only Drafts or Cancelled)
+     * Delete Agreement (Admins can delete any agreement)
      */
     public function destroy(Agreement $agreement)
     {
-        if (! in_array($agreement->status, ['draft', 'cancelled'], true)) {
-            return back()->with('error', 'Active or signed agreements cannot be deleted. Cancel the agreement first.');
-        }
-
         $num = $agreement->agreement_number;
 
         if ($agreement->pdf_path && Storage::disk('local')->exists($agreement->pdf_path)) {
             Storage::disk('local')->delete($agreement->pdf_path);
         }
 
+        if ($agreement->estamp_certificate_path && Storage::disk('local')->exists($agreement->estamp_certificate_path)) {
+            Storage::disk('local')->delete($agreement->estamp_certificate_path);
+        }
+
+        // Delete associated audit logs
+        $agreement->auditLogs()->delete();
+
         $agreement->delete();
 
         AgreementAuditLog::log(
             null,
             'deleted',
-            "Agreement {$num} permanently deleted by " . Auth::user()->name . "."
+            "Agreement {$num} permanently deleted by " . (Auth::user()?->name ?? 'Admin') . "."
         );
 
         return redirect()->route('admin.agreements.index')
-            ->with('success', "Agreement {$num} deleted.");
+            ->with('success', "Agreement {$num} deleted successfully.");
+    }
+
+    /**
+     * Delete All Dummy / Sample Agreements
+     */
+    public function clearDummyAgreements()
+    {
+        $dummyAgreements = Agreement::whereIn('agreement_number', [
+            'AGR-2026-0001',
+            'AGR-2026-0002',
+            'AGR-2026-0003',
+            'AGR-2026-0004',
+        ])->orWhereIn('id', [1, 2, 3, 4])->get();
+
+        $count = $dummyAgreements->count();
+
+        foreach ($dummyAgreements as $agr) {
+            if ($agr->pdf_path && Storage::disk('local')->exists($agr->pdf_path)) {
+                Storage::disk('local')->delete($agr->pdf_path);
+            }
+            if ($agr->estamp_certificate_path && Storage::disk('local')->exists($agr->estamp_certificate_path)) {
+                Storage::disk('local')->delete($agr->estamp_certificate_path);
+            }
+            $agr->auditLogs()->delete();
+            $agr->delete();
+        }
+
+        return redirect()->route('admin.agreements.index')
+            ->with('success', "Deleted {$count} dummy/sample agreements successfully.");
     }
 }
 

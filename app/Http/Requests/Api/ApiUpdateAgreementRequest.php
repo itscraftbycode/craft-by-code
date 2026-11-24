@@ -42,3 +42,4 @@ class ApiUpdateAgreementRequest extends FormRequest
         ], 422));
     }
 }
+

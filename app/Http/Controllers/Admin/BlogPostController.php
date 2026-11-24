@@ -50,6 +50,9 @@ class BlogPostController extends Controller
             'author_name' => 'nullable|string|max:100',
             'is_featured' => 'nullable|boolean',
             'is_published' => 'nullable|boolean',
+        ], [
+            'image_file.uploaded' => 'The image failed to upload. The file may exceed server upload limits (upload_max_filesize / post_max_size in php.ini) or directory write permissions.',
+            'image_file.max' => 'The image file must not exceed 8MB.',
         ]);
 
         if (! empty($validated['image']) && ! UrlValidator::isSafeMediaPath($validated['image'])) {
@@ -102,6 +105,9 @@ class BlogPostController extends Controller
             'author_name' => 'nullable|string|max:100',
             'is_featured' => 'nullable|boolean',
             'is_published' => 'nullable|boolean',
+        ], [
+            'image_file.uploaded' => 'The image failed to upload. The file may exceed server upload limits (upload_max_filesize / post_max_size in php.ini) or directory write permissions.',
+            'image_file.max' => 'The image file must not exceed 8MB.',
         ]);
 
         if (! empty($validated['image']) && ! UrlValidator::isSafeMediaPath($validated['image'])) {

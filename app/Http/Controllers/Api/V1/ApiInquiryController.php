@@ -123,3 +123,4 @@ class ApiInquiryController extends Controller
         ]);
     }
 }
+

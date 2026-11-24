@@ -31,3 +31,4 @@ class ApiInquiryStatusRequest extends FormRequest
         ], 422));
     }
 }
+

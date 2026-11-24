@@ -44,3 +44,4 @@ class ApiSecurityHeadersMiddleware
         return $response;
     }
 }
+

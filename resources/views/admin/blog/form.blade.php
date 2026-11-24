@@ -70,6 +70,11 @@
                 updateFilePreview(e) {
                     const file = e.target.files[0];
                     if (file) {
+                        if (file.size > 8 * 1024 * 1024) {
+                            alert('File is too large! Maximum allowed image size is 8MB.');
+                            e.target.value = '';
+                            return;
+                        }
                         this.previewUrl = URL.createObjectURL(file);
                     }
                 }

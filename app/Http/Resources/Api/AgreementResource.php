@@ -44,3 +44,4 @@ class AgreementResource extends JsonResource
         ];
     }
 }
+

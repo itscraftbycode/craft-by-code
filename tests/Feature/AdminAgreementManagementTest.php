@@ -269,5 +269,25 @@ class AdminAgreementManagementTest extends TestCase
         $settingsResponse->assertOk();
         $settingsResponse->assertSee('Legal Entity &amp; Contract Settings', false);
     }
+
+    public function test_admin_can_delete_agreement(): void
+    {
+        $agreement = Agreement::firstOrFail();
+        $agrId = $agreement->id;
+
+        $response = $this->actingAs($this->admin)->delete(route('admin.agreements.destroy', $agrId));
+        $response->assertRedirect(route('admin.agreements.index'));
+
+        $this->assertDatabaseMissing('agreements', ['id' => $agrId]);
+    }
+
+    public function test_admin_can_purge_dummy_agreements(): void
+    {
+        $response = $this->actingAs($this->admin)->post(route('admin.agreements.clear-dummy'));
+        $response->assertRedirect(route('admin.agreements.index'));
+
+        $this->assertDatabaseMissing('agreements', ['agreement_number' => 'AGR-2026-0001']);
+        $this->assertDatabaseMissing('agreements', ['agreement_number' => 'AGR-2026-0002']);
+    }
 }
 

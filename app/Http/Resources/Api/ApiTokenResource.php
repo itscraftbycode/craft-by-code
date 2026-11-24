@@ -26,3 +26,4 @@ class ApiTokenResource extends JsonResource
         ];
     }
 }
+

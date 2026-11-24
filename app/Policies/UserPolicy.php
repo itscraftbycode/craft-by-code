@@ -27,3 +27,4 @@ class UserPolicy
         return (int) $user->id !== (int) $target->id && ($user->role === 'admin' || $user->role === 'super_admin');
     }
 }
+

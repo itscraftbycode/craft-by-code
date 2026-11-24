@@ -127,6 +127,12 @@
                     <form action="{{ route('contact.submit') }}" method="POST" class="space-y-6">
                         @csrf
 
+                        <!-- Honeypot Bot Trap (Invisible to humans) -->
+                        <div style="display:none !important;" aria-hidden="true">
+                            <label for="contact_hp_website">Leave this field blank</label>
+                            <input type="text" id="contact_hp_website" name="contact_hp_website" value="" tabindex="-1" autocomplete="off">
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <!-- Name -->
                             <div>

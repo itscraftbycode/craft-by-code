@@ -47,3 +47,4 @@ class ApiTokenPolicy
         return (int) $token->user_id === (int) $user->id;
     }
 }
+

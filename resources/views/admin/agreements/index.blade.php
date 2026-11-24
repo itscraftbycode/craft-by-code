@@ -41,6 +41,13 @@
                 <span>Settings</span>
             </a>
             @if(Auth::user()->hasPermission('agreements.manage'))
+                <form action="{{ route('admin.agreements.clear-dummy') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete all dummy/sample agreements?');" class="inline">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/60 dark:bg-rose-950/30 hover:bg-rose-100 text-xs font-bold text-rose-600 dark:text-rose-400 transition" title="Delete all sample dummy contracts">
+                        <x-icon name="trash" class="w-3.5 h-3.5" />
+                        <span>Purge Dummy Data</span>
+                    </button>
+                </form>
                 <a href="{{ route('admin.agreements.create') }}" 
                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white transition shadow-md hover:shadow-lg">
                     <x-icon name="plus" class="w-3.5 h-3.5" />
@@ -287,11 +294,11 @@
                                        title="Download PDF">
                                         <x-icon name="download" class="w-4 h-4" />
                                     </a>
-                                    @if(in_array($agr->status, ['draft', 'cancelled']))
-                                        <form action="{{ route('admin.agreements.destroy', $agr->id) }}" method="POST" onsubmit="return confirm('Permanently delete this draft agreement?');" class="inline">
+                                    @if(Auth::user()->hasPermission('agreements.manage'))
+                                        <form action="{{ route('admin.agreements.destroy', $agr->id) }}" method="POST" onsubmit="return confirm('Permanently delete agreement {{ $agr->agreement_number }}? This cannot be undone.');" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 border border-slate-200/60 dark:border-slate-800 transition" title="Delete Draft">
+                                            <button type="submit" class="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 border border-slate-200/60 dark:border-slate-800 transition" title="Delete Agreement">
                                                 <x-icon name="trash" class="w-4 h-4" />
                                             </button>
                                         </form>

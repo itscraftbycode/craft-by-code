@@ -101,3 +101,4 @@ class BlockMaliciousBotsMiddleware
         return $next($request);
     }
 }
+

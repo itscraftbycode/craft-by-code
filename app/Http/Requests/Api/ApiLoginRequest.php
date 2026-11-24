@@ -33,3 +33,4 @@ class ApiLoginRequest extends FormRequest
         ], 422));
     }
 }
+

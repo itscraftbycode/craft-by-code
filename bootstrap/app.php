@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.security' => \App\Http\Middleware\ApiSecurityHeadersMiddleware::class,
             'api.botblock' => \App\Http\Middleware\BlockMaliciousBotsMiddleware::class,
             'api.sanitize' => \App\Http\Middleware\SanitizeApiInputMiddleware::class,
+            'verify.webhook' => \App\Http\Middleware\VerifyWebhookSignatureMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

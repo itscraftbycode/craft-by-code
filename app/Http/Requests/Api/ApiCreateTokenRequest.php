@@ -33,3 +33,4 @@ class ApiCreateTokenRequest extends FormRequest
         ], 422));
     }
 }
+

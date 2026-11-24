@@ -188,6 +188,22 @@ class FrontendController extends Controller
      */
     public function submitInquiry(Request $request)
     {
+        // Honeypot bot trap check
+        if ($request->filled('contact_hp_website')) {
+            \App\Security\SecurityLogger::log('bot_honeypot_triggered', 'Automated bot caught by inquiry honeypot field', 'medium', null, $request, [
+                'bot_payload' => $request->input('contact_hp_website'),
+            ]);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Thank you! Your message has been received. Our team will contact you within 24 hours.'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Thank you! Your message has been received. Our team will contact you within 24 hours.');
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100',
             'email' => 'required|email|max:150',

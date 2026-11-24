@@ -44,6 +44,20 @@
                     <span>Edit</span>
                 </a>
             @endif
+
+            <!-- Delete Agreement -->
+            @if(Auth::user()->hasPermission('agreements.manage'))
+                <form action="{{ route('admin.agreements.destroy', $agreement->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete agreement {{ $agreement->agreement_number }}? This action cannot be undone.');" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" 
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition shadow-sm hover:shadow" 
+                            title="Delete Agreement">
+                        <x-icon name="trash" class="w-3.5 h-3.5" />
+                        <span>Delete</span>
+                    </button>
+                </form>
+            @endif
         </div>
     </div>
 
@@ -118,13 +132,13 @@
                     <div class="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800">
                         <span class="text-[10px] text-slate-400 block font-semibold">Start Date</span>
                         <span class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">
-                            {{ $agreement->start_date ? $agreement->start_date->format('M d, Y') : 'Immediate' }}
+                            {{ $agreement->start_date ? \Carbon\Carbon::parse($agreement->start_date)->format('M d, Y') : 'Immediate' }}
                         </span>
                     </div>
                     <div class="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800">
                         <span class="text-[10px] text-slate-400 block font-semibold">End Date</span>
                         <span class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">
-                            {{ $agreement->end_date ? $agreement->end_date->format('M d, Y') : 'Per Milestones' }}
+                            {{ $agreement->end_date ? \Carbon\Carbon::parse($agreement->end_date)->format('M d, Y') : 'Per Milestones' }}
                         </span>
                     </div>
                     <div class="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800">
@@ -136,7 +150,7 @@
                     <div class="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800">
                         <span class="text-[10px] text-slate-400 block font-semibold">PDF Compiled</span>
                         <span class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">
-                            {{ $agreement->pdf_generated_at ? $agreement->pdf_generated_at->diffForHumans() : 'Pending' }}
+                            {{ $agreement->pdf_generated_at ? \Carbon\Carbon::parse($agreement->pdf_generated_at)->diffForHumans() : 'Pending' }}
                         </span>
                     </div>
                 </div>
@@ -190,13 +204,13 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <span class="text-[10px] text-slate-400 block">Signatory:</span>
-                                <span class="font-bold text-slate-900 dark:text-white">{{ $agreement->digital_signature_metadata['signed_by'] ?? 'Admin Craft By Code' }}</span>
-                                <span class="text-[11px] text-slate-500 block">({{ $agreement->digital_signature_metadata['signatory_role'] ?? 'Authorized Officer' }})</span>
+                                <span class="font-bold text-slate-900 dark:text-white">{{ is_array($agreement->digital_signature_metadata) ? ($agreement->digital_signature_metadata['signed_by'] ?? 'Admin Craft By Code') : 'Admin Craft By Code' }}</span>
+                                <span class="text-[11px] text-slate-500 block">({{ is_array($agreement->digital_signature_metadata) ? ($agreement->digital_signature_metadata['signatory_role'] ?? 'Authorized Officer') : 'Authorized Officer' }})</span>
                             </div>
                             <div>
                                 <span class="text-[10px] text-slate-400 block">Timestamp:</span>
-                                <span class="font-bold text-slate-900 dark:text-white">{{ $agreement->signed_at ? $agreement->signed_at->format('Y-m-d H:i:s T') : 'Verified' }}</span>
-                                <span class="text-[11px] text-slate-500 block">IP: {{ $agreement->digital_signature_metadata['signer_ip'] ?? '127.0.0.1' }}</span>
+                                <span class="font-bold text-slate-900 dark:text-white">{{ $agreement->signed_at ? \Carbon\Carbon::parse($agreement->signed_at)->format('Y-m-d H:i:s T') : 'Verified' }}</span>
+                                <span class="text-[11px] text-slate-500 block">IP: {{ is_array($agreement->digital_signature_metadata) ? ($agreement->digital_signature_metadata['signer_ip'] ?? '127.0.0.1') : '127.0.0.1' }}</span>
                             </div>
                         </div>
                         <div class="pt-2 border-t border-emerald-100 dark:border-emerald-900/50">
@@ -241,7 +255,7 @@
                         </div>
                         <div>
                             <span class="text-[10px] text-amber-700 dark:text-amber-400 block">Issued On:</span>
-                            <span class="font-bold text-slate-900 dark:text-white">{{ $agreement->estamp_issued_at ? $agreement->estamp_issued_at->format('M d, Y') : 'Verified' }}</span>
+                            <span class="font-bold text-slate-900 dark:text-white">{{ $agreement->estamp_issued_at ? \Carbon\Carbon::parse($agreement->estamp_issued_at)->format('M d, Y') : 'Verified' }}</span>
                         </div>
                     </div>
                 </div>
@@ -265,7 +279,7 @@
                                 <p class="text-slate-600 dark:text-slate-400 text-[11px]">{{ $log->details }}</p>
                             </div>
                             <span class="text-[10px] text-slate-400 whitespace-nowrap">
-                                {{ $log->created_at->format('M d, Y H:i') }}
+                                {{ $log->created_at ? \Carbon\Carbon::parse($log->created_at)->format('M d, Y H:i') : '' }}
                             </span>
                         </div>
                     @empty
@@ -419,6 +433,25 @@
                     </button>
                 </form>
             </div>
+
+            <!-- 5. Danger Zone / Delete Agreement -->
+            @if(Auth::user()->hasPermission('agreements.manage'))
+                <div class="p-6 rounded-3xl bg-rose-50/40 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/50 shadow-sm space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Danger Zone</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                        Permanently delete this contract, its audit trail, and stored PDF files from the database.
+                    </p>
+                    <form action="{{ route('admin.agreements.destroy', $agreement->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete agreement {{ $agreement->agreement_number }}? This cannot be undone.');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" 
+                                class="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs uppercase tracking-wider transition shadow-sm hover:shadow flex items-center justify-center gap-1.5">
+                            <x-icon name="trash" class="w-3.5 h-3.5" />
+                            <span>Delete Agreement Permanently</span>
+                        </button>
+                    </form>
+                </div>
+            @endif
 
         </div>
     </div>

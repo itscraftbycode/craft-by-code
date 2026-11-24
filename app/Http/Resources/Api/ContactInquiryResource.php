@@ -32,3 +32,4 @@ class ContactInquiryResource extends JsonResource
         ];
     }
 }
+
