@@ -66,7 +66,8 @@
 
             <!-- Blog Image Upload & URL -->
             <div class="space-y-3" x-data="{
-                previewUrl: '{{ $post->image ? (str_starts_with($post->image, 'http') || str_starts_with($post->image, '/') ? $post->image : asset($post->image)) : '' }}',
+                filePreview: '',
+                directImageUrl: '{{ old('image', $post->image ? (str_starts_with($post->image, 'http') || str_starts_with($post->image, '/') ? $post->image : asset($post->image)) : '') }}',
                 updateFilePreview(e) {
                     const file = e.target.files[0];
                     if (file) {
@@ -75,17 +76,19 @@
                             e.target.value = '';
                             return;
                         }
-                        this.previewUrl = URL.createObjectURL(file);
+                        this.filePreview = URL.createObjectURL(file);
+                    } else {
+                        this.filePreview = '';
                     }
                 }
             }">
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Featured Cover Image</label>
                 
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                    <template x-if="previewUrl">
-                        <img :src="previewUrl" alt="Cover preview" class="w-28 h-20 object-cover rounded-xl border border-slate-300 shadow-sm bg-slate-900">
+                    <template x-if="filePreview || directImageUrl">
+                        <img :src="filePreview || directImageUrl" alt="Cover preview" class="w-28 h-20 object-cover rounded-xl border border-slate-300 shadow-sm bg-slate-900">
                     </template>
-                    <template x-if="!previewUrl">
+                    <template x-if="!filePreview && !directImageUrl">
                         <div class="w-28 h-20 rounded-xl bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-400 text-xs font-semibold">
                             No image
                         </div>
@@ -103,7 +106,7 @@
 
                         <div>
                             <span class="block text-[11px] font-bold text-slate-600 mb-1">Or Direct Image URL / Path (Optional)</span>
-                            <input type="text" name="image" x-model="previewUrl" value="{{ old('image', $post->image) }}" placeholder="/assets/images/blog/blog-code.jpg or https://..."
+                            <input type="text" name="image" x-model="directImageUrl" value="{{ old('image', $post->image) }}" placeholder="/assets/images/blog/blog-code.jpg or https://..."
                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
                             @error('image')
                                 <p class="text-xs text-rose-600 font-semibold mt-1">{{ $message }}</p>

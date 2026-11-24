@@ -59,10 +59,6 @@ class ProjectController extends Controller
             'image_file.max' => 'The image file must not exceed 8MB.',
         ]);
 
-        if (! empty($validated['image']) && ! UrlValidator::isSafeMediaPath($validated['image'])) {
-            return back()->withInput()->withErrors(['image' => 'Image URL must be a valid http/https URL or relative media path.']);
-        }
-
         if (! empty($validated['project_url']) && ! UrlValidator::isSafeHttpUrl($validated['project_url'], false)) {
             return back()->withInput()->withErrors(['project_url' => 'Live Project URL must start with http:// or https://.']);
         }
@@ -77,9 +73,16 @@ class ProjectController extends Controller
 
                 return back()->withInput()->withErrors(['image_file' => 'Failed to save uploaded image: '.$e->getMessage()]);
             }
-        } elseif (! empty($request->input('image'))) {
-            $validated['image'] = trim($request->input('image'));
-        } elseif (empty($validated['image'])) {
+        } elseif (! empty($validated['image'])) {
+            $imageInput = trim($validated['image']);
+            if (str_starts_with($imageInput, 'blob:')) {
+                $validated['image'] = '/assets/images/projects/project-analytics.jpg';
+            } elseif (! UrlValidator::isSafeMediaPath($imageInput)) {
+                return back()->withInput()->withErrors(['image' => 'Image URL must be a valid http/https URL or relative media path.']);
+            } else {
+                $validated['image'] = $imageInput;
+            }
+        } else {
             $validated['image'] = '/assets/images/projects/project-analytics.jpg';
         }
 
@@ -123,10 +126,6 @@ class ProjectController extends Controller
             'image_file.max' => 'The image file must not exceed 8MB.',
         ]);
 
-        if (! empty($validated['image']) && ! UrlValidator::isSafeMediaPath($validated['image'])) {
-            return back()->withInput()->withErrors(['image' => 'Image URL must be a valid http/https URL or relative media path.']);
-        }
-
         if (! empty($validated['project_url']) && ! UrlValidator::isSafeHttpUrl($validated['project_url'], false)) {
             return back()->withInput()->withErrors(['project_url' => 'Live Project URL must start with http:// or https://.']);
         }
@@ -144,7 +143,16 @@ class ProjectController extends Controller
                 return back()->withInput()->withErrors(['image_file' => 'Failed to save uploaded image: '.$e->getMessage()]);
             }
         } elseif (! empty($request->input('image'))) {
-            $validated['image'] = trim($request->input('image'));
+            $imageInput = trim($request->input('image'));
+            if (str_starts_with($imageInput, 'blob:')) {
+                unset($validated['image']);
+            } elseif (! UrlValidator::isSafeMediaPath($imageInput)) {
+                return back()->withInput()->withErrors(['image' => 'Image URL must be a valid http/https URL or relative media path.']);
+            } else {
+                $validated['image'] = $imageInput;
+            }
+        } else {
+            unset($validated['image']);
         }
 
         $validated['slug'] = ! empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['title']);

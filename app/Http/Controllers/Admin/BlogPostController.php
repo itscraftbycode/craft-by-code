@@ -55,10 +55,6 @@ class BlogPostController extends Controller
             'image_file.max' => 'The image file must not exceed 8MB.',
         ]);
 
-        if (! empty($validated['image']) && ! UrlValidator::isSafeMediaPath($validated['image'])) {
-            return back()->withInput()->withErrors(['image' => 'Featured image URL must be a valid http/https URL or relative media path.']);
-        }
-
         if ($request->hasFile('image_file')) {
             try {
                 $validated['image'] = SecureFileUpload::storeImage($request->file('image_file'), 'blog', 8192);
@@ -69,9 +65,16 @@ class BlogPostController extends Controller
 
                 return back()->withInput()->withErrors(['image_file' => 'Failed to save uploaded image: '.$e->getMessage()]);
             }
-        } elseif (! empty($request->input('image'))) {
-            $validated['image'] = trim($request->input('image'));
-        } elseif (empty($validated['image'])) {
+        } elseif (! empty($validated['image'])) {
+            $imageInput = trim($validated['image']);
+            if (str_starts_with($imageInput, 'blob:')) {
+                $validated['image'] = '/assets/images/blog/blog-code.jpg';
+            } elseif (! UrlValidator::isSafeMediaPath($imageInput)) {
+                return back()->withInput()->withErrors(['image' => 'Featured image URL must be a valid http/https URL or relative media path.']);
+            } else {
+                $validated['image'] = $imageInput;
+            }
+        } else {
             $validated['image'] = '/assets/images/blog/blog-code.jpg';
         }
 
@@ -110,10 +113,6 @@ class BlogPostController extends Controller
             'image_file.max' => 'The image file must not exceed 8MB.',
         ]);
 
-        if (! empty($validated['image']) && ! UrlValidator::isSafeMediaPath($validated['image'])) {
-            return back()->withInput()->withErrors(['image' => 'Featured image URL must be a valid http/https URL or relative media path.']);
-        }
-
         if ($request->hasFile('image_file')) {
             try {
                 $previous = $post->image;
@@ -127,7 +126,16 @@ class BlogPostController extends Controller
                 return back()->withInput()->withErrors(['image_file' => 'Failed to save uploaded image: '.$e->getMessage()]);
             }
         } elseif (! empty($request->input('image'))) {
-            $validated['image'] = trim($request->input('image'));
+            $imageInput = trim($request->input('image'));
+            if (str_starts_with($imageInput, 'blob:')) {
+                unset($validated['image']);
+            } elseif (! UrlValidator::isSafeMediaPath($imageInput)) {
+                return back()->withInput()->withErrors(['image' => 'Featured image URL must be a valid http/https URL or relative media path.']);
+            } else {
+                $validated['image'] = $imageInput;
+            }
+        } else {
+            unset($validated['image']);
         }
 
         $validated['slug'] = ! empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['title']);
