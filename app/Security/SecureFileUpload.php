@@ -57,9 +57,32 @@ class SecureFileUpload
             throw ValidationException::withMessages(['file' => 'Uploaded temporary file could not be inspected.']);
         }
 
-        // Verify true magic bytes using finfo rather than trusting browser MIME headers or extension
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $detectedMime = (string) $finfo->file($realTmpPath);
+        // Verify true magic bytes with resilient fallback if finfo extension is disabled
+        $detectedMime = '';
+        if (class_exists(\finfo::class)) {
+            try {
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $detectedMime = (string) $finfo->file($realTmpPath);
+            } catch (\Throwable $e) {
+                $detectedMime = '';
+            }
+        } elseif (function_exists('mime_content_type')) {
+            $detectedMime = (string) @mime_content_type($realTmpPath);
+        }
+
+        if (empty($detectedMime) || ! isset(self::ALLOWED_MIME_MAP[$detectedMime])) {
+            $imageInfo = @getimagesize($realTmpPath);
+            if (is_array($imageInfo) && ! empty($imageInfo['mime']) && isset(self::ALLOWED_MIME_MAP[$imageInfo['mime']])) {
+                $detectedMime = (string) $imageInfo['mime'];
+            }
+        }
+
+        if (empty($detectedMime) || ! isset(self::ALLOWED_MIME_MAP[$detectedMime])) {
+            $candidateMime = (string) $file->getMimeType();
+            if (isset(self::ALLOWED_MIME_MAP[$candidateMime])) {
+                $detectedMime = $candidateMime;
+            }
+        }
 
         if (! isset(self::ALLOWED_MIME_MAP[$detectedMime])) {
             SecurityLogger::log('upload_rejected', 'Blocked uploaded file with disallowed MIME signature', 'high', auth()->user(), request(), [
