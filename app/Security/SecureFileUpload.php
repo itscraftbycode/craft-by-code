@@ -39,22 +39,22 @@ class SecureFileUpload
             SecurityLogger::log('path_traversal_blocked', 'Rejected upload to invalid media category', 'high', auth()->user(), request(), [
                 'category' => $category,
             ]);
-            throw ValidationException::withMessages(['file' => 'Invalid upload category.']);
+            throw ValidationException::withMessages(['image_file' => 'Invalid upload category.']);
         }
 
         if (! $file->isValid()) {
-            throw ValidationException::withMessages(['file' => 'Uploaded file failed transfer integrity checks.']);
+            throw ValidationException::withMessages(['image_file' => 'Uploaded file failed transfer integrity checks.']);
         }
 
         $maxBytes = $maxKilobytes * 1024;
         $size = (int) $file->getSize();
         if ($size <= 0 || $size > $maxBytes) {
-            throw ValidationException::withMessages(['file' => "Image must not exceed {$maxKilobytes} KB."]);
+            throw ValidationException::withMessages(['image_file' => "Image must not exceed {$maxKilobytes} KB."]);
         }
 
         $realTmpPath = $file->getRealPath();
         if (! $realTmpPath || ! is_file($realTmpPath)) {
-            throw ValidationException::withMessages(['file' => 'Uploaded temporary file could not be inspected.']);
+            throw ValidationException::withMessages(['image_file' => 'Uploaded temporary file could not be inspected.']);
         }
 
         // Verify true magic bytes with resilient fallback if finfo extension is disabled
@@ -90,7 +90,7 @@ class SecureFileUpload
                 'original_name' => $file->getClientOriginalName(),
                 'category' => $category,
             ]);
-            throw ValidationException::withMessages(['file' => 'Only JPEG, PNG, and WebP images are permitted. SVG and executable files are blocked.']);
+            throw ValidationException::withMessages(['image_file' => 'Only JPEG, PNG, and WebP images are permitted. SVG and executable files are blocked.']);
         }
 
         // Verify valid raster image structure
@@ -100,17 +100,17 @@ class SecureFileUpload
                 'detected_mime' => $detectedMime,
                 'category' => $category,
             ]);
-            throw ValidationException::withMessages(['file' => 'Uploaded file is not a valid raster image.']);
+            throw ValidationException::withMessages(['image_file' => 'Uploaded file is not a valid raster image.']);
         }
 
-        // Reject polyglot payloads containing embedded PHP, script tags, or inline SVG XML
+        // Reject polyglot payloads containing executable PHP code or HTML scripts
         $rawBytes = @file_get_contents($realTmpPath);
-        if ($rawBytes === false || preg_match('/<\?php|<\?=|<script\b|<svg\b/i', $rawBytes)) {
-            SecurityLogger::log('upload_rejected', 'Blocked potential polyglot or embedded script payload inside upload', 'critical', auth()->user(), request(), [
+        if ($rawBytes === false || preg_match('/<\?(?:php|=)|<script\b/i', $rawBytes)) {
+            SecurityLogger::log('upload_rejected', 'Blocked potential polyglot or executable script payload inside upload', 'critical', auth()->user(), request(), [
                 'detected_mime' => $detectedMime,
                 'category' => $category,
             ]);
-            throw ValidationException::withMessages(['file' => 'Uploaded file rejected by security content inspection.']);
+            throw ValidationException::withMessages(['image_file' => 'Uploaded file rejected: executable code or scripts detected in binary payload.']);
         }
 
         $canonicalExt = self::ALLOWED_MIME_MAP[$detectedMime];
