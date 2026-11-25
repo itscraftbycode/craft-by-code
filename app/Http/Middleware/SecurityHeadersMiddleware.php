@@ -52,10 +52,10 @@ class SecurityHeadersMiddleware
             }
         }
 
-        $scriptSources = "'self' 'nonce-{$nonce}' 'unsafe-eval'";
+        $scriptSources = "'self' 'nonce-{$nonce}' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://challenges.cloudflare.com";
         $connectSources = $isLocal
-            ? "'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*"
-            : "'self'";
+            ? "'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://challenges.cloudflare.com"
+            : "'self' https://challenges.cloudflare.com";
 
         if ($ga4Id !== '') {
             $scriptSources .= ' https://www.googletagmanager.com';
@@ -72,7 +72,7 @@ class SecurityHeadersMiddleware
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com data:",
             "img-src 'self' data: https:",
-            "frame-src 'self' https://www.google.com https://maps.google.com",
+            "frame-src 'self' https://www.google.com https://maps.google.com https://www.google.com/recaptcha/ https://recaptcha.google.com/ https://challenges.cloudflare.com",
             "connect-src {$connectSources}",
         ];
 

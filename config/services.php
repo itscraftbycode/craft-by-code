@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'captcha' => [
+        'driver' => env('CAPTCHA_DRIVER', 'recaptcha'),
+        'site_key' => env('CAPTCHA_SITE_KEY', ''),
+        'secret_key' => env('CAPTCHA_SECRET_KEY', ''),
+    ],
+
 ];

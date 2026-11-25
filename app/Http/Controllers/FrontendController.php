@@ -226,6 +226,15 @@ class FrontendController extends Controller
             return redirect()->back()->withErrors($validator)->withInput()->with('error', 'Please correct the highlighted errors below.');
         }
 
+        // CAPTCHA verification (Google reCAPTCHA / Cloudflare Turnstile)
+        if (! \App\Security\CaptchaValidator::verify($request)) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'errors' => ['captcha' => ['Security CAPTCHA verification failed. Please try again.']]], 422);
+            }
+
+            return redirect()->back()->withErrors(['captcha' => 'Security CAPTCHA verification failed. Please try again.'])->withInput();
+        }
+
         $inquiry = ContactInquiry::create([
             'name' => strip_tags(trim($request->input('name'))),
             'email' => trim($request->input('email')),

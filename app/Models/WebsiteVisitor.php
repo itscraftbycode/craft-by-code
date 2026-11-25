@@ -78,3 +78,4 @@ class WebsiteVisitor extends Model
         return substr($this->ip_address, 0, 8).'****';
     }
 }
+
