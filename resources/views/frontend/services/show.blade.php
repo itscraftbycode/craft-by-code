@@ -226,6 +226,9 @@
                                       class="w-full px-3.5 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600">{{ old('message') }}</textarea>
                         </div>
 
+                        <!-- CAPTCHA Verification (Google reCAPTCHA / Cloudflare Turnstile) -->
+                        <x-captcha />
+
                         <button type="submit" 
                                 class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wide uppercase transition shadow-md hover:shadow-lg hover:scale-[1.01]">
                             Submit Inquiry

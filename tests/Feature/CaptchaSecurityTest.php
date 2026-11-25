@@ -101,3 +101,4 @@ class CaptchaSecurityTest extends TestCase
         ]);
     }
 }
+

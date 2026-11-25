@@ -15,11 +15,12 @@
             <div class="g-recaptcha" data-sitekey="{{ $siteKey }}" data-theme="dark"></div>
         @endif
 
-        @error('captcha')
+        @if(isset($errors) && $errors->has('captcha'))
             <p class="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1">
                 <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span>{{ $message }}</span>
+                <span>{{ $errors->first('captcha') }}</span>
             </p>
-        @enderror
+        @endif
     </div>
 @endif
+
