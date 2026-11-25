@@ -49,15 +49,20 @@ class CaptchaValidator
             ]);
 
             $success = (bool) $response->json('success', false);
+            $score = (float) $response->json('score', 1.0);
+            $minScore = (float) config('services.captcha.min_score', 0.5);
 
-            if (! $success) {
+            if (! $success || ($response->json('score') !== null && $score < $minScore)) {
                 SecurityLogger::log('captcha_failed', 'CAPTCHA verification rejected by upstream provider', 'medium', null, $request, [
                     'driver' => $driver,
+                    'score' => $response->json('score'),
                     'error_codes' => $response->json('error-codes', []),
                 ]);
+
+                return false;
             }
 
-            return $success;
+            return true;
         } catch (\Throwable $e) {
             SecurityLogger::log('captcha_error', 'CAPTCHA verification network error: '.$e->getMessage(), 'high', null, $request);
 

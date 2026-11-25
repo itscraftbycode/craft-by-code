@@ -54,8 +54,8 @@ class SecurityHeadersMiddleware
 
         $scriptSources = "'self' 'nonce-{$nonce}' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://challenges.cloudflare.com";
         $connectSources = $isLocal
-            ? "'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://challenges.cloudflare.com"
-            : "'self' https://challenges.cloudflare.com";
+            ? "'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://challenges.cloudflare.com https://www.google.com/recaptcha/"
+            : "'self' https://challenges.cloudflare.com https://www.google.com/recaptcha/";
 
         if ($ga4Id !== '') {
             $scriptSources .= ' https://www.googletagmanager.com';

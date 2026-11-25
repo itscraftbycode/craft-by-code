@@ -36,9 +36,10 @@ return [
     ],
 
     'captcha' => [
-        'driver' => env('CAPTCHA_DRIVER', 'recaptcha'),
+        'driver' => env('CAPTCHA_DRIVER', 'recaptcha_v3'),
         'site_key' => env('CAPTCHA_SITE_KEY', ''),
         'secret_key' => env('CAPTCHA_SECRET_KEY', ''),
+        'min_score' => (float) env('CAPTCHA_MIN_SCORE', 0.5),
     ],
 
 ];

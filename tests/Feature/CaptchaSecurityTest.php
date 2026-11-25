@@ -100,5 +100,35 @@ class CaptchaSecurityTest extends TestCase
             'email' => 'bad@company.com',
         ]);
     }
+
+    public function test_contact_form_blocks_submission_when_recaptcha_v3_score_is_below_threshold(): void
+    {
+        config([
+            'services.captcha.driver' => 'recaptcha_v3',
+            'services.captcha.secret_key' => 'test_v3_secret_789',
+            'services.captcha.min_score' => 0.5,
+            'services.captcha.test_enforcement' => true,
+        ]);
+
+        Http::fake([
+            'https://www.google.com/recaptcha/api/siteverify' => Http::response([
+                'success' => true,
+                'score' => 0.1, // Bot-like low score
+                'action' => 'contact_submit',
+            ], 200),
+        ]);
+
+        $response = $this->post('/contact', [
+            'name' => 'Bot User',
+            'email' => 'bot@spammer.com',
+            'message' => 'Spam message meeting length requirements for test verification.',
+            'g-recaptcha-response' => 'low_score_token',
+        ]);
+
+        $response->assertSessionHasErrors(['captcha']);
+        $this->assertDatabaseMissing('contact_inquiries', [
+            'email' => 'bot@spammer.com',
+        ]);
+    }
 }
 
