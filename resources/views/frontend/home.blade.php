@@ -16,7 +16,7 @@
 
 @section('content')
     <!-- 1. HERO SECTION -->
-    <section class="relative overflow-hidden pt-8 pb-16 sm:pt-10 sm:pb-20 lg:pt-12 lg:pb-28 gradient-hero">
+    <section class="relative overflow-hidden pt-8 pb-10 sm:pt-10 sm:pb-12 lg:pt-12 lg:pb-14 gradient-hero">
         <!-- Floating 3D Elements Decorative (Brain & Terminal) -->
         <div class="hidden lg:block absolute left-12 top-28 animate-bounce transition duration-1000" style="animation-duration: 4s;">
             <div class="w-16 h-16 rounded-2xl bg-white dark:bg-slate-900 shadow-xl dark:shadow-blue-950/50 border border-slate-100 dark:border-slate-800 flex items-center justify-center p-3">
@@ -158,7 +158,7 @@
     --}}
 
     <!-- 3. OUR SERVICES SECTION -->
-    <section class="py-16 sm:py-20 lg:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="pt-4 pb-16 sm:pt-6 sm:pb-20 lg:pt-8 lg:pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-12 gap-4">
             <div>
                 <span class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block mb-2">Our Services</span>
