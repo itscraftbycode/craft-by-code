@@ -10,12 +10,27 @@ use App\Models\Project;
 use App\Models\Service;
 use App\Models\Testimonial;
 use App\Models\WebsiteSetting;
+use App\Models\WebsiteVisitor;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        $totalVisitors = 0;
+        $todayVisitors = 0;
+        $recentVisitors = collect();
+
+        try {
+            $totalVisitors = WebsiteVisitor::count();
+            $todayVisitors = WebsiteVisitor::whereDate('first_visited_at', today())->count();
+            $recentVisitors = WebsiteVisitor::latest('last_visited_at')->take(5)->get();
+        } catch (\Throwable $e) {
+            // Graceful fallback if table is still migrating
+        }
+
         $stats = [
+            'total_visitors' => $totalVisitors,
+            'today_visitors' => $todayVisitors,
             'total_inquiries' => ContactInquiry::count(),
             'unread_inquiries' => ContactInquiry::where('status', 'new')->count(),
             'total_services' => Service::count(),
@@ -32,7 +47,7 @@ class DashboardController extends Controller
         $recentProjects = Project::latest()->take(4)->get();
         $recentAgreements = Agreement::latest()->take(4)->get();
 
-        return view('admin.dashboard', compact('stats', 'recentInquiries', 'recentProjects', 'recentAgreements'));
+        return view('admin.dashboard', compact('stats', 'recentInquiries', 'recentProjects', 'recentAgreements', 'recentVisitors'));
     }
 }
 

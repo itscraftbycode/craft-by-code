@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
         $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\TrackUniqueVisitors::class);
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,

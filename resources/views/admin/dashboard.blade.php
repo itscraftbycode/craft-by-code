@@ -48,8 +48,23 @@
             </div>
         </div>
 
-        <!-- 6 Stat Cards Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <!-- 7 Stat Cards Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            <!-- Unique Visitors -->
+            <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-slate-500">Unique Visitors</span>
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <x-icon name="users" class="w-4 h-4" />
+                    </div>
+                </div>
+                <div class="text-2xl font-black text-slate-900">{{ number_format($stats['total_visitors'] ?? 0) }}</div>
+                <div class="text-[11px] font-semibold text-emerald-600 mt-1 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>+{{ $stats['today_visitors'] ?? 0 }} new today</span>
+                </div>
+            </div>
+
             <!-- Inquiries -->
             <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col justify-between">
                 <div class="flex items-center justify-between mb-2">
@@ -196,6 +211,74 @@
                             <tr>
                                 <td colspan="6" class="py-8 text-center text-slate-400">
                                     No inquiries received yet.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Unique Visitors Table -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <h3 class="text-base font-bold text-slate-900">Live Website Traffic (Unique Visitors)</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5">Real-time unique human visitors to the public website (deduplicated by hardware &amp; network signature)</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl">
+                        Total Unique: {{ number_format($stats['total_visitors'] ?? 0) }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                        <tr>
+                            <th class="py-3 px-6">Device / Platform</th>
+                            <th class="py-3 px-6">Network (Masked IP)</th>
+                            <th class="py-3 px-6">Entry Page</th>
+                            <th class="py-3 px-6">Page Views (Hits)</th>
+                            <th class="py-3 px-6">First Seen</th>
+                            <th class="py-3 px-6 text-right">Last Active</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-medium">
+                        @forelse($recentVisitors as $v)
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="py-4 px-6 text-slate-900 font-bold flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center flex-shrink-0">
+                                        <x-icon name="monitor" class="w-3.5 h-3.5" />
+                                    </div>
+                                    <span>{{ $v->device_label }}</span>
+                                </td>
+                                <td class="py-4 px-6 text-slate-600 font-mono text-[11px]">
+                                    {{ $v->masked_ip }}
+                                </td>
+                                <td class="py-4 px-6 text-blue-600 font-mono text-[11px]">
+                                    /{{ ltrim($v->landing_page, '/') }}
+                                </td>
+                                <td class="py-4 px-6">
+                                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">
+                                        {{ $v->hits }} {{ Str::plural('page', $v->hits) }}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-6 text-slate-400 text-[11px]">
+                                    {{ $v->first_visited_at?->diffForHumans() ?? 'Just now' }}
+                                </td>
+                                <td class="py-4 px-6 text-right text-slate-500 text-[11px]">
+                                    {{ $v->last_visited_at?->diffForHumans() ?? 'Just now' }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-slate-400">
+                                    No visitors recorded yet. Visitors to your public website will appear here in real time.
                                 </td>
                             </tr>
                         @endforelse
