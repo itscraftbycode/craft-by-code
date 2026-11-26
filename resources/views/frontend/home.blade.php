@@ -291,7 +291,7 @@
                         <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4 mx-auto sm:mx-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
                         </div>
-                        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">{{ $statClients }}</div>
+                        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight stat-counter-value" data-stat-value="{{ $statClients }}">{{ $statClients }}</div>
                         <div class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">Happy Clients</div>
                     </div>
 
@@ -299,7 +299,7 @@
                         <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4 mx-auto sm:mx-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                         </div>
-                        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">{{ $statProjects }}</div>
+                        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight stat-counter-value" data-stat-value="{{ $statProjects }}">{{ $statProjects }}</div>
                         <div class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">Projects Completed</div>
                     </div>
 
@@ -307,7 +307,7 @@
                         <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 mx-auto sm:mx-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
                         </div>
-                        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">{{ $statYears }}</div>
+                        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight stat-counter-value" data-stat-value="{{ $statYears }}">{{ $statYears }}</div>
                         <div class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">Years Experience</div>
                     </div>
 
@@ -315,7 +315,7 @@
                         <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 mx-auto sm:mx-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m12 15-3-3m0 0 3-3m-3 3h12"/><path d="M4.5 16.5c-1.5 1.26-2 3.5-2 3.5s2.24-.5 3.5-2"/></svg>
                         </div>
-                        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">{{ $statSat }}</div>
+                        <div class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight stat-counter-value" data-stat-value="{{ $statSat }}">{{ $statSat }}</div>
                         <div class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">Client Satisfaction</div>
                     </div>
                 </div>
@@ -428,3 +428,83 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+<script @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+(function () {
+    function initStatCounters() {
+        var counters = document.querySelectorAll('.stat-counter-value');
+        if (!counters.length) return;
+
+        function parse(val) {
+            var raw = (val || '').trim();
+            var match = raw.match(/^([^0-9\.]*)(\d+(?:\.\d+)?)(.*)$/);
+            if (!match) return { prefix: '', target: 0, suffix: raw, decimals: 0 };
+            return {
+                prefix: match[1] || '',
+                target: parseFloat(match[2]),
+                suffix: match[3] || '',
+                decimals: match[2].indexOf('.') !== -1 ? match[2].split('.')[1].length : 0
+            };
+        }
+
+        function run(el) {
+            var raw = el.getAttribute('data-stat-value') || el.innerText;
+            var parsed = parse(raw);
+            if (isNaN(parsed.target) || parsed.target <= 0) return;
+
+            var duration = 1800; // 1.8s smooth rolling duration
+            var start = null;
+
+            function step(timestamp) {
+                if (!start) start = timestamp;
+                var progress = Math.min((timestamp - start) / duration, 1);
+                // Ease out cubic curve: 1 - (1 - progress)^3
+                var ease = 1 - Math.pow(1 - progress, 3);
+                var current = parsed.target * ease;
+
+                el.innerText = parsed.prefix + (parsed.decimals > 0 ? current.toFixed(parsed.decimals) : Math.floor(current)) + parsed.suffix;
+
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    el.innerText = raw;
+                }
+            }
+
+            window.requestAnimationFrame(step);
+        }
+
+        if ('IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function (entries, obs) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        run(entry.target);
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.25 });
+
+            counters.forEach(function (el) {
+                var raw = el.getAttribute('data-stat-value') || el.innerText;
+                var parsed = parse(raw);
+                if (!isNaN(parsed.target) && parsed.target > 0) {
+                    el.innerText = parsed.prefix + '0' + parsed.suffix;
+                }
+                observer.observe(el);
+            });
+        } else {
+            counters.forEach(function (el) {
+                run(el);
+            });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStatCounters);
+    } else {
+        initStatCounters();
+    }
+})();
+</script>
+@endpush
