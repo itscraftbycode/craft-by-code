@@ -112,5 +112,42 @@ class UniqueVisitorTrackingTest extends TestCase
         $response->assertOk();
         $response->assertSee('Unique Visitors');
         $response->assertSee('Live Website Traffic (Unique Visitors)');
+        $response->assertSee('Visitor Location (Place)');
+    }
+
+    public function test_visitor_location_is_captured_from_headers_and_rendered(): void
+    {
+        $response = $this->withServerVariables([
+            'REMOTE_ADDR' => '103.21.244.2',
+            'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0',
+            'HTTP_CF_IPCOUNTRY' => 'IN',
+            'HTTP_CF_IPCITY' => 'Bhubaneswar',
+            'HTTP_CF_REGION' => 'Odisha',
+        ])->get('/');
+
+        $response->assertOk();
+
+        $visitor = WebsiteVisitor::first();
+        $this->assertNotNull($visitor);
+        $this->assertEquals('India', $visitor->country);
+        $this->assertEquals('IN', $visitor->country_code);
+        $this->assertEquals('Bhubaneswar', $visitor->city);
+        $this->assertEquals('Odisha', $visitor->region);
+        $this->assertEquals('Bhubaneswar, India', $visitor->location_label);
+        $this->assertNotEmpty($visitor->country_flag);
+
+        $admin = new User([
+            'name' => 'Admin User',
+            'email' => 'admin_loc@test.com',
+            'password' => Hash::make('Password!1234'),
+        ]);
+        $admin->role = 'admin';
+        $admin->is_active = true;
+        $admin->save();
+
+        $dashResponse = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $dashResponse->assertOk();
+        $dashResponse->assertSee('Bhubaneswar, India');
+        $dashResponse->assertSee('Odisha');
     }
 }

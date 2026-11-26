@@ -12,6 +12,10 @@ class WebsiteVisitor extends Model
         'user_agent',
         'landing_page',
         'referer',
+        'country',
+        'country_code',
+        'city',
+        'region',
         'hits',
         'first_visited_at',
         'last_visited_at',
@@ -57,6 +61,41 @@ class WebsiteVisitor extends Model
         }
 
         return 'Web Client';
+    }
+
+    /**
+     * Human-readable visitor location (City, Country).
+     */
+    public function getLocationLabelAttribute(): string
+    {
+        $city = trim((string) $this->city);
+        $country = trim((string) $this->country);
+
+        if (! empty($city) && ! empty($country)) {
+            return "{$city}, {$country}";
+        }
+
+        if (! empty($country)) {
+            return $country;
+        }
+
+        if (! empty($city)) {
+            return $city;
+        }
+
+        if (\App\Services\GeoLocationService::isPrivateOrLocal((string) $this->ip_address)) {
+            return 'Local Environment';
+        }
+
+        return 'Unknown Location';
+    }
+
+    /**
+     * Flag emoji corresponding to visitor country code.
+     */
+    public function getCountryFlagAttribute(): string
+    {
+        return \App\Services\GeoLocationService::getFlagEmoji($this->country_code);
     }
 
     /**

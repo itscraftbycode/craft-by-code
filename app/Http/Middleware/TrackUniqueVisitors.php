@@ -55,6 +55,8 @@ class TrackUniqueVisitors
         // 6. Record or update unique visitor record safely
         if (! $request->session()->has($sessionKey)) {
             try {
+                $location = \App\Services\GeoLocationService::resolve($request, $ip);
+
                 $visitor = WebsiteVisitor::firstOrCreate(
                     ['visitor_hash' => $visitorHash],
                     [
@@ -62,6 +64,10 @@ class TrackUniqueVisitors
                         'user_agent' => substr($ua, 0, 250),
                         'landing_page' => substr($request->path(), 0, 250),
                         'referer' => substr((string) $request->header('referer'), 0, 250),
+                        'country' => $location['country'] ?? null,
+                        'country_code' => $location['country_code'] ?? null,
+                        'city' => $location['city'] ?? null,
+                        'region' => $location['region'] ?? null,
                         'first_visited_at' => now(),
                         'last_visited_at' => now(),
                         'hits' => 1,
@@ -69,7 +75,16 @@ class TrackUniqueVisitors
                 );
 
                 if (! $visitor->wasRecentlyCreated) {
-                    $visitor->increment('hits', 1, ['last_visited_at' => now()]);
+                    $updatePayload = ['last_visited_at' => now()];
+
+                    if (empty($visitor->country) && ! empty($location['country'])) {
+                        $updatePayload['country'] = $location['country'];
+                        $updatePayload['country_code'] = $location['country_code'];
+                        $updatePayload['city'] = $location['city'];
+                        $updatePayload['region'] = $location['region'];
+                    }
+
+                    $visitor->increment('hits', 1, $updatePayload);
                 }
 
                 $request->session()->put($sessionKey, true);

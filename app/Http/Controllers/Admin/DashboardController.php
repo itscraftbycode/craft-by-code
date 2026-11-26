@@ -19,11 +19,18 @@ class DashboardController extends Controller
         $totalVisitors = 0;
         $todayVisitors = 0;
         $recentVisitors = collect();
+        $topLocations = collect();
 
         try {
             $totalVisitors = WebsiteVisitor::count();
             $todayVisitors = WebsiteVisitor::whereDate('first_visited_at', today())->count();
-            $recentVisitors = WebsiteVisitor::latest('last_visited_at')->take(5)->get();
+            $recentVisitors = WebsiteVisitor::latest('last_visited_at')->take(8)->get();
+            $topLocations = WebsiteVisitor::whereNotNull('country')
+                ->selectRaw('country, country_code, count(*) as count')
+                ->groupBy('country', 'country_code')
+                ->orderByDesc('count')
+                ->take(4)
+                ->get();
         } catch (\Throwable $e) {
             // Graceful fallback if table is still migrating
         }
@@ -47,7 +54,7 @@ class DashboardController extends Controller
         $recentProjects = Project::latest()->take(4)->get();
         $recentAgreements = Agreement::latest()->take(4)->get();
 
-        return view('admin.dashboard', compact('stats', 'recentInquiries', 'recentProjects', 'recentAgreements', 'recentVisitors'));
+        return view('admin.dashboard', compact('stats', 'recentInquiries', 'recentProjects', 'recentAgreements', 'recentVisitors', 'topLocations'));
     }
 }
 

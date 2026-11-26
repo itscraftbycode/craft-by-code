@@ -16,6 +16,10 @@ return new class extends Migration
                 $table->string('user_agent', 255)->nullable();
                 $table->string('landing_page', 255)->nullable();
                 $table->string('referer', 255)->nullable();
+                $table->string('country', 100)->nullable()->index();
+                $table->string('country_code', 10)->nullable()->index();
+                $table->string('city', 100)->nullable()->index();
+                $table->string('region', 100)->nullable();
                 $table->unsignedInteger('hits')->default(1);
                 $table->timestamp('first_visited_at')->useCurrent()->index();
                 $table->timestamp('last_visited_at')->useCurrent()->index();

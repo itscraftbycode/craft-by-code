@@ -221,15 +221,26 @@
 
         <!-- Recent Unique Visitors Table -->
         <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <h3 class="text-base font-bold text-slate-900">Live Website Traffic (Unique Visitors)</h3>
                     </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Real-time unique human visitors to the public website (deduplicated by hardware &amp; network signature)</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Real-time unique human visitors to the public website with geographical origin &amp; device signature</p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    @if(isset($topLocations) && $topLocations->isNotEmpty())
+                        <div class="hidden md:flex items-center gap-1.5 mr-2">
+                            @foreach($topLocations as $tl)
+                                <span class="inline-flex items-center gap-1 text-[11px] font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-xl">
+                                    <span>{{ \App\Services\GeoLocationService::getFlagEmoji($tl->country_code) }}</span>
+                                    <span>{{ $tl->country }}</span>
+                                    <span class="text-slate-400 font-bold text-[10px]">({{ $tl->count }})</span>
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
                     <span class="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl">
                         Total Unique: {{ number_format($stats['total_visitors'] ?? 0) }}
                     </span>
@@ -240,6 +251,7 @@
                 <table class="w-full text-left text-xs text-slate-600">
                     <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                         <tr>
+                            <th class="py-3 px-6">Visitor Location (Place)</th>
                             <th class="py-3 px-6">Device / Platform</th>
                             <th class="py-3 px-6">Network (Masked IP)</th>
                             <th class="py-3 px-6">Entry Page</th>
@@ -251,7 +263,20 @@
                     <tbody class="divide-y divide-slate-100 font-medium">
                         @forelse($recentVisitors as $v)
                             <tr class="hover:bg-slate-50/80 transition">
-                                <td class="py-4 px-6 text-slate-900 font-bold flex items-center gap-2">
+                                <td class="py-4 px-6 text-slate-900">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-xl flex-shrink-0" title="{{ $v->country ?? 'Unknown' }}">{{ $v->country_flag }}</span>
+                                        <div>
+                                            <div class="font-bold text-slate-900 text-[12px] flex items-center gap-1">
+                                                <span>{{ $v->location_label }}</span>
+                                            </div>
+                                            @if($v->region && $v->region !== $v->city)
+                                                <div class="text-[10px] text-slate-400 font-medium">{{ $v->region }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6 text-slate-900 font-semibold flex items-center gap-2">
                                     <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center flex-shrink-0">
                                         <x-icon name="monitor" class="w-3.5 h-3.5" />
                                     </div>
@@ -277,7 +302,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="py-8 text-center text-slate-400">
+                                <td colspan="7" class="py-8 text-center text-slate-400">
                                     No visitors recorded yet. Visitors to your public website will appear here in real time.
                                 </td>
                             </tr>
